@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zombie Street Shootout</title>
+
+
+<link rel="icon" href="favicon_io (12)/android-chrome-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon_io (12)/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon_io (12)/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon_io (12)/favicon-16x16.png">
+<link rel="manifest" href="favicon_io (12)/site.webmanifest">
+    
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #6692a5, #203a43, #09939d);
+    font-family: 'Roboto', sans-serif;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 3rem;
+    margin: 30px 0 10px;
+    color: #ff5555;
+    text-shadow: 0 0 10px #ff4444;
+  }
+
+  main {
+    background: rgba(30, 30, 30, 0.85);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 85, 85, 0.6);
+    width: 360px;
+    max-width: 90vw;
+  }
+
+  label {
+    display: block;
+    margin: 15px 0 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #ff9999;
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    background-color: #222;
+    color: #eee;
+    box-shadow: inset 0 0 5px #111;
+    transition: background-color 0.3s;
+  }
+
+  input[type="text"]:focus,
+  select:focus {
+    outline: none;
+    background-color: #333;
+  }
+
+  button {
+    margin-top: 25px;
+    width: 100%;
+    background-color: #ff5555;
+    border: none;
+    padding: 14px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px #ff5555aa;
+    transition: background-color 0.25s ease-in-out;
+  }
+
+  button:hover {
+    background-color: #ff2222;
+  }
+
+  #log {
+    margin-top: 25px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: #111;
+    border-radius: 10px;
+    padding: 15px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #ffa0a0;
+    box-shadow: inset 0 0 10px #440000;
+  }
+
+  .log-entry {
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+  <header>🧟 Zombie Street Shootout</header>
+  <main>
+    <label for="playerName">Player Name</label>
+    <input type="text" id="playerName" placeholder="Enter your name" />
+
+    <label for="weapon">Select Weapon</label>
+    <select id="weapon">
+      <option value="knife">Knife</option>
+      <option value="pistol">Pistol</option>
+      <option value="shotgun">Shotgun</option>
+    </select>
+
+    <label for="zombie">Select Zombie</label>
+    <select id="zombie">
+      <option value="Walker">Walker</option>
+      <option value="Runner">Runner</option>
+      <option value="Tank">Tank</option>
+    </select>
+
+    <button onclick="startGame()">Start Fight</button>
+
+    <div id="log"></div>
+  </main>
+
+  <script>
+    function startGame() {
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML = '';
+
+      const name = document.getElementById('playerName').value || 'Player';
+      const weaponChoice = document.getElementById('weapon').value;
+      const zombieType = document.getElementById('zombie').value;
+
+      let player = {
+        name,
+        health: 100,
+        currentWeapon: weaponChoice,
+        inventory: {
+          knife: { damage: 10, ammo: Infinity },
+          pistol: { damage: 25, ammo: 2 },
+          shotgun: { damage: 50, ammo: 1 }
+        }
+      };
+
+      let zombies = {
+        Walker: { type: 'Walker', health: 60 },
+        Runner: { type: 'Runner', health: 70 },
+        Tank: { type: 'Tank', health: 120 }
+      };
+
+      let zombie = { ...zombies[zombieType] };
+
+      function log(message) {
+        console.log(message);
+        const p = document.createElement('div');
+        p.className = 'log-entry';
+        p.textContent = message;
+        logDiv.appendChild(p);
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      log(`🧟 A ${zombie.type} appears!`);
+      log(`🔫 Player is armed with: ${player.currentWeapon}`);
+
+      while (player.health > 0 && zombie.health > 0) {
+        let weapon = player.inventory[player.currentWeapon];
+
+        if (weapon.ammo <= 0 && weapon.ammo !== Infinity) {
+          log(`⚠️ No ammo for ${player.currentWeapon}! Switching to knife...`);
+          player.currentWeapon = 'knife';
+          weapon = player.inventory.knife;
+        }
+
+        zombie.health -= weapon.damage;
+        log(`💥 ${player.name} attacks with ${player.currentWeapon}!`);
+
+        if (zombie.health <= 0) break;
+
+        player.health -= 15;
+        log(`🧟 The ${zombie.type} attacks back!`);
+
+        if (weapon.ammo !== Infinity) weapon.ammo--;
+
+        log(`📊 Player health: ${player.health}`);
+        log(`📊 Zombie health: ${zombie.health}`);
+        log(`📦 Ammo left for ${player.currentWeapon}: ${weapon.ammo}`);
+        log('---');
+      }
+
+      log('=== GAME OVER ===');
+      log(`🏆 Final Player Status: ${JSON.stringify(player)}`);
+      log(`☠️ Final Zombie Status: ${JSON.stringify(zombie)}`);
+    }
+  </script>
+</body>
+</html>
